@@ -20,6 +20,8 @@ def parse_tags(parameters: str):
     raw_parts = parameters.split(", ")
     parts: list[list[str]] = []
     for part in raw_parts:
+        if not part:
+            continue
         if part[0] in ascii_uppercase and ": " in part:
             sub_parts = part.split(": ")
             parts.append(sub_parts)
