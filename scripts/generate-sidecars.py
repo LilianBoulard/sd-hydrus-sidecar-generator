@@ -52,4 +52,4 @@ class Script(scripts.Script):
             sidecars_count += 1
             geninfo, _ = images.read_info_from_image(Image.open(file))
             print(convert_to_hydrus_tags(geninfo))
-        raise Finished(f"Done constructing {sidecars_count} sidecars")*
+        raise Finished(f"Done constructing {sidecars_count} sidecars")
