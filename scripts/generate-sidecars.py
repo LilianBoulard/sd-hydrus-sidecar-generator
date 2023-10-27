@@ -36,7 +36,7 @@ def to_hydrus(parameters: dict[str, str]) -> list[str]:
     Converts parsed parameters to hydrus tags.
     """
     ignored = {"Size", "Version"}
-    hydrus_tags = []
+    hydrus_tags = ["creator:Stable Diffusion"]
     for key, value in parameters.items():
         if key in ignored:
             continue
