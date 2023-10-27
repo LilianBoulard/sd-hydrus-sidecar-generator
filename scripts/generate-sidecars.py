@@ -66,8 +66,11 @@ class Script(scripts.Script):
 
     def run(self, p: StableDiffusionProcessing):
         sidecars_count = 0
-        for file in Path(p.outpath_samples).iterdir():
-            sidecars_count += 1
+        images_directory = Path(p.outpath_samples)
+        for file in images_directory.iterdir():
+            sidecar_file = images_directory / f"{file.name}.txt"
             geninfo, _ = images.read_info_from_image(Image.open(file))
-            print(to_hydrus(parse_tags(geninfo)))
+            tags = to_hydrus(parse_tags(geninfo))
+            sidecar_file.write_text("\n".join(tags))
+            sidecars_count += 1
         raise Finished(f"Done constructing {sidecars_count} sidecars")
