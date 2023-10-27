@@ -14,20 +14,38 @@ from pathlib import Path
 from string import ascii_uppercase
 
 
-def convert_to_hydrus_tags(parameters: str):
+def parse_tags(parameters: str):
     parameters = f"Prompt: {parameters}"  # Prefix
-    parameters = parameters.replace(r"\n", ", ")
+    parameters = parameters.replace("\n", ", ")
     raw_parts = parameters.split(", ")
-    parts: list[list[str]] = [[]]
+    parts: list[list[str]] = []
     for part in raw_parts:
         if part[0] in ascii_uppercase and ": " in part:
-            parts.append([part])
+            sub_parts = part.split(": ")
+            parts.append(sub_parts)
         else:
             parts[-1].append(part)
     return {
-        part[0]: part[1:]
+        part[0]: ", ".join(part[1:])
         for part in parts
     }
+
+
+def to_hydrus(parameters: dict[str, str]) -> list[str]:
+    """
+    Converts parsed parameters to hydrus tags.
+    """
+    ignored = {"Size", "Version"}
+    hydrus_tags = []
+    for key, value in parameters.items():
+        if key in ignored:
+            continue
+        if key == "Prompt":
+            # We add the prompt parameters to the tags themselves
+            hydrus_tags.extend(value.split(", "))
+        tag = f"sd:{key}:{value}"
+        hydrus_tags.append(tag)
+    return hydrus_tags
 
 
 
@@ -51,5 +69,5 @@ class Script(scripts.Script):
         for file in Path(p.outpath_samples).iterdir():
             sidecars_count += 1
             geninfo, _ = images.read_info_from_image(Image.open(file))
-            print(convert_to_hydrus_tags(geninfo))
+            print(to_hydrus(parse_tags(geninfo)))
         raise Finished(f"Done constructing {sidecars_count} sidecars")
