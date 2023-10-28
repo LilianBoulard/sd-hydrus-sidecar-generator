@@ -9,7 +9,7 @@ Licensed under the GNU Affero General Public License.
 import modules.scripts as scripts
 from modules import images
 from modules.processing import StableDiffusionProcessing
-from PIL import Image
+from PIL import Image, UnidentifiedImageError
 from pathlib import Path
 from string import ascii_uppercase
 
@@ -50,7 +50,6 @@ def to_hydrus(parameters: dict[str, str]) -> list[str]:
     return hydrus_tags
 
 
-
 class Finished(Exception):
     pass
 
@@ -71,7 +70,11 @@ class Script(scripts.Script):
         images_directory = Path(p.outpath_samples)
         for file in images_directory.iterdir():
             sidecar_file = images_directory / f"{file.name}.txt"
-            geninfo, _ = images.read_info_from_image(Image.open(file))
+            try:
+                image = Image.open(file)
+            except UnidentifiedImageError:
+                continue
+            geninfo, _ = images.read_info_from_image(image)
             tags = to_hydrus(parse_tags(geninfo))
             sidecar_file.write_text("\n".join(tags))
             sidecars_count += 1
